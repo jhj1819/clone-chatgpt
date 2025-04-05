@@ -5,7 +5,21 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 
 export default function Home() {
-  const { messages, input, handleInputChange, handleSubmit, isLoading } = useChat();
+  const { messages, input, handleInputChange, handleSubmit, isLoading } = useChat({
+    api: '/api/chat',
+    headers: {
+      'Content-Type': 'application/json; charset=UTF-8'
+    },
+    body: {
+      // 추가 설정이 필요한 경우 여기에 추가
+    },
+    onResponse: (response) => {
+      console.log('AI 응답 받음:', response.status);
+    },
+    onError: (error) => {
+      console.error('채팅 오류:', error);
+    }
+  });
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-4 md:p-24">
