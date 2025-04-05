@@ -6,9 +6,6 @@ import { openai } from "@ai-sdk/openai";
 // Edge 런타임 설정 (최적의 성능을 위해)
 export const runtime = "edge";
 
-// OpenAI 모델 설정
-const openAIModel = openai("gpt-3.5-turbo");
-
 // 시스템 프롬프트 설정
 const systemPrompt = `당신은 도움이 되는 AI 비서입니다. 사용자의 질문에 친절하고 정확하게 답변해 주세요.
 가능한 한 간결하게 답변하되, 중요한 정보는 누락하지 마세요.
@@ -24,9 +21,15 @@ export async function POST(req: NextRequest) {
 
     // 메시지 유효성 검사
     if (!messages || !Array.isArray(messages)) {
-      return new Response('메시지가 유효하지 않습니다.', { 
-        status: 400 
-      });
+      return new Response(
+        JSON.stringify({ error: '메시지가 유효하지 않습니다.' }),
+        { 
+          status: 400,
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      );
     }
 
     // 시스템 메시지가 이미 있는지 확인
@@ -37,16 +40,34 @@ export async function POST(req: NextRequest) {
       ? messages 
       : [{ role: 'system', content: systemPrompt } as Message, ...messages];
 
-    // AI SDK를 사용하여 스트리밍 응답 생성
-    const response = await streamText({
-      model: openAIModel,
-      messages: finalMessages,
-      temperature: 0.7,
-      maxTokens: 1000,
-    });
+    try {
+      // AI SDK를 사용하여 스트리밍 응답 생성
+      const response = await streamText({
+        model: openai('gpt-3.5-turbo'),
+        messages: finalMessages,
+        temperature: 0.7,
+        maxTokens: 1000,
+      });
 
-    // 스트리밍 응답 반환
-    return response.toDataStreamResponse();
+      // 스트리밍 응답 반환
+      return response.toDataStreamResponse();
+    } catch (streamError: any) {
+      console.error('스트리밍 응답 생성 오류:', streamError);
+      
+      // 스트리밍 실패 시 일반 JSON 응답으로 대체
+      return new Response(
+        JSON.stringify({ 
+          error: '응답 스트리밍 중 오류가 발생했습니다.', 
+          details: streamError.message 
+        }),
+        { 
+          status: 500, 
+          headers: { 
+            'Content-Type': 'application/json' 
+          } 
+        }
+      );
+    }
     
   } catch (error: any) {
     console.error('Chat API 에러:', error);
