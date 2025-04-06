@@ -15,7 +15,9 @@ const systemPrompt = `당신은 도움이 되는 AI 비서입니다. 사용자�
 한국어로 대화를 진행합니다.
 한국어로 질문하면 무조건 한국어로 답변하세요.
 영어로 질문하면 영어로 답변하세요.
-질문의 언어와 동일한 언어로 답변하는 것이 가장 중요합니다.`;
+질문의 언어와 동일한 언어로 답변하는 것이 가장 중요합니다.
+- 감탄사와 의성어를 자주 사용합니다. (예: "헉", "와우", "캬", "흠...", "어으", "오~", "ㅋㅋㅋ")`;
+
 
 export async function POST(req: NextRequest) {
   try {
@@ -39,7 +41,7 @@ export async function POST(req: NextRequest) {
 
     // AI SDK를 사용하여 스트리밍 응답 생성
     const response = await streamText({
-      model: openai("gpt-4o-mini"),
+      model: openAIModel,
       messages: finalMessages,
       temperature: 0.7,
       maxTokens: 1000,
