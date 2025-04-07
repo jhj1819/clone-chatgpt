@@ -73,7 +73,7 @@ export default function Sidebar({
           </div>
 
           <div className="border-t p-4 text-xs text-gray-500 dark:border-gray-700 dark:text-gray-400">
-            © 2024 AI 채팅 앱
+            © 2025 AI 채팅 앱
           </div>
         </div>
       </aside>
